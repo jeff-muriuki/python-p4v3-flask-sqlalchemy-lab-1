@@ -14,6 +14,28 @@ app.json.compact = False
 migrate = Migrate(app, db)
 db.init_app(app)
 
+@app.route('/earthquakes/<int:id>')
+def quake_by_id(id):
+    quake= Earthquake.query.filter(Earthquake.id == id).first()
+
+    if quake:
+        body= quake.to_dict()
+        status= 200
+    else:
+        body= {'message': f'Earthquake {id} not found.'}
+        status= 404
+
+    return make_response(body, status)
+
+@app.route('/earthquakes/magnitude/<float:magnitude>')
+def get_earthquake(magnitude):
+    quakes= []
+    for quake in Earthquake.query.filter(Earthquake.magnitude >= magnitude).all():
+        quakes.append(quake.to_dict()) 
+    body= {'count': len(quakes),
+            'quakes': quakes
+            }
+    return make_response(body, 200)
 
 @app.route('/')
 def index():
